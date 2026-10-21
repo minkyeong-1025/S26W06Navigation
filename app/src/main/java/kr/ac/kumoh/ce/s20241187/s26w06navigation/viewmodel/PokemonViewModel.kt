@@ -17,8 +17,12 @@ class PokemonListViewModel : ViewModel() {
     val pokemonList = _pokemonList.asStateFlow()
 }
 
-class PokemonDetailViewModel : ViewModel() {
-    fun getPokemonById(id: Int): Pokemon? {
-        return pokemons.find { it.id == id }
-    }
+class PokemonDetailViewModel(
+    private val pokemonId: Int
+) : ViewModel() {
+    private val _pokemon = MutableStateFlow(
+        pokemons.find { it.id == pokemonId }
+            ?: Pokemon(-1, "알수 없음", "없음", "Unknown")
+    )
+    val pokemon = _pokemon.asStateFlow()
 }
