@@ -12,7 +12,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -76,11 +78,10 @@ fun MainScreen() {
 
 @Composable
 fun PokemonListScreen(
-//    pokemonList: List<Pokemon>,
     onNavigateToDetail: (Int) -> Unit,
     viewModel: PokemonListViewModel = viewModel()
 ) {
-    val pokemonList = viewModel.pokemonList
+    val pokemonList by viewModel.pokemonList.collectAsStateWithLifecycle()
 
     LazyColumn {
         items(pokemonList) { pokemon ->
