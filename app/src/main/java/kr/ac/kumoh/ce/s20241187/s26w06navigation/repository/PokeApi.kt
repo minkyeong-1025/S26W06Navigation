@@ -9,17 +9,22 @@ import retrofit2.http.Query
 interface PokeApi {
     @GET("pokemon")
     suspend fun getPokemonList(
-        @Query("limit") limit: Int = 100,
-        @Query("offset") offset: Int = 0
+        @Query("limit") limit: Int = 100
     ): PokemonListDto
 
     @GET("pokemon/{id}")
     suspend fun getPokemonDetail(
         @Path("id") id: Int
     ): PokemonDetailDto
+
+    // 한국어 이름과 설명은 종 (species) 정보에 있음
+    @GET("pokemon-species/{id}")
+    suspend fun getPokemonSpecies(
+        @Path("id") id: Int
+    ): PokemonSpeciesDto
 }
 
-@kotlinx.serialization.Serializable
+@Serializable
 data class PokemonListDto(
     @SerialName("results") val results: List<ResultDto>
 ) {
@@ -50,5 +55,28 @@ data class PokemonDetailDto(
     @Serializable
     data class SpritesDto(
         @SerialName("front_default") val frontDefault: String? = null
+    )
+}
+
+@Serializable
+data class LanguageDto(
+    @SerialName("name") val name: String
+)
+
+@Serializable
+data class PokemonSpeciesDto(
+    @SerialName("names") val names: List<NameDto> = emptyList(),
+    @SerialName("flavor_text_entries") val flavorTextEntries: List<FlavorTextEntryDto> = emptyList()
+) {
+    @Serializable
+    data class NameDto(
+        @SerialName("name") val name: String,
+        @SerialName("language") val language: LanguageDto
+    )
+
+    @Serializable
+    data class FlavorTextEntryDto(
+        @SerialName("flavor_text") val flavorText: String,
+        @SerialName("language") val language: LanguageDto
     )
 }
