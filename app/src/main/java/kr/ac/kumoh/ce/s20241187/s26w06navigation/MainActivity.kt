@@ -23,6 +23,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import kr.ac.kumoh.ce.s20241187.s26w06navigation.navigation.PokemonRoute
+import kr.ac.kumoh.ce.s20241187.s26w06navigation.repository.ApiPokemonRepository
 import kr.ac.kumoh.ce.s20241187.s26w06navigation.repository.MockPokemonRepository
 import kr.ac.kumoh.ce.s20241187.s26w06navigation.repository.PokemonRepository
 import kr.ac.kumoh.ce.s20241187.s26w06navigation.ui.screen.PokemonDetailScreen
@@ -36,7 +37,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val repository: PokemonRepository = MockPokemonRepository()
+        //val repository: PokemonRepository = MockPokemonRepository()
+        val repository = ApiPokemonRepository()
 
         setContent {
             S26W06NavigationTheme {
@@ -83,42 +85,3 @@ fun MainScreen(
         )
     }
 }
-
-//@Composable
-//fun PokemonListScreen(
-//    repository: PokemonRepository,
-//    viewModel: PokemonListViewModel = viewModel {
-//        PokemonListViewModel(repository)
-//    },
-//    onNavigateToDetail: (Int) -> Unit,
-//) {
-//    val pokemonList by viewModel.pokemonList.collectAsStateWithLifecycle()
-//
-//    LazyColumn {
-//        items(pokemonList) { pokemon ->
-//            Button(
-//                onClick = {
-//                    onNavigateToDetail(pokemon.id)
-//                }
-//            ) {
-//                Text(pokemon.name)
-//            }
-//        }
-//    }
-//}
-
-//@Composable
-//fun PokemonDetailScreen(
-//    pokemonId: Int,
-//    repository: PokemonRepository,
-//    viewModel: PokemonDetailViewModel = viewModel {
-//        PokemonDetailViewModel(
-//            repository = repository,
-//            pokemonId = pokemonId
-//        )
-//    },
-//) {
-//    val pokemon by viewModel.pokemon.collectAsStateWithLifecycle()
-//
-//    Text(pokemon.name)
-//}
