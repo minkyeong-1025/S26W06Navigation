@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -74,7 +75,10 @@ fun PokemonCard(
         elevation = CardDefaults.cardElevation(8.dp),
         // 추가: 카드 배경을 대표 타입 색으로 연하게
         colors = CardDefaults.cardColors(
+            // 연한 타입 색을 흰 배경 위에 미리 섞어서 불투명한 색으로 만듦
+            // → 카드 밑의 그림자가 비치지 않음
             containerColor = typeColor(mainType).copy(alpha = 0.15f)
+                .compositeOver(MaterialTheme.colorScheme.surface)
         ),
         onClick = { onClick(pokemon.id) }
     ) {
