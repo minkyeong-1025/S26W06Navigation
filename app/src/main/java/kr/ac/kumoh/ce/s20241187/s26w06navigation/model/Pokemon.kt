@@ -10,6 +10,7 @@ data class Pokemon(
     val height: Int = 0,                 // 추가: 키 (단위 10cm)
     val weight: Int = 0,                 // 추가: 몸무게 (단위 100g)
     val stats: List<Stat> = emptyList(), // 추가: 능력치 목록
+    val englishName: String = "",  // 추가: 영어 이름 (Bulbasaur)
 )
 
 // 추가: 능력치 하나 (예: "hp", 45)

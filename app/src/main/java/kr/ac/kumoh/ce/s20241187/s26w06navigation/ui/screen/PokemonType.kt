@@ -1,6 +1,7 @@
 package kr.ac.kumoh.ce.s20241187.s26w06navigation.ui.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -8,9 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 // 타입별 대표 색
 private val typeColors = mapOf(
@@ -43,21 +45,24 @@ private val typeNames = mapOf(
     "steel" to "강철", "fairy" to "페어리",
 )
 
-// 목록에 없는 타입이면 회색 / 영어 그대로
 fun typeColor(type: String): Color = typeColors[type] ?: Color.Gray
 fun typeName(type: String): String = typeNames[type] ?: type
 
+// 변경: 꽉 찬 원색 → 연한 배경 + 밝은 색 글자 + 얇은 테두리
 @Composable
 fun TypeChip(type: String) {
     val color = typeColor(type)
+    val shape = RoundedCornerShape(50)
     Text(
         text = typeName(type),
-        // 밝은 배경(전기, 얼음 등)은 검은 글자, 어두운 배경은 흰 글자
-        color = if (color.luminance() > 0.5f) Color.Black else Color.White,
+        // 어두운 배경에서도 잘 보이게 타입 색을 흰색 쪽으로 45% 섞음
+        color = lerp(color, Color.White, 0.45f),
+        fontSize = 12.sp,
         fontWeight = FontWeight.Bold,
         modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .background(color)
-            .padding(horizontal = 12.dp, vertical = 4.dp),
+            .clip(shape)
+            .background(color.copy(alpha = 0.2f))
+            .border(1.dp, color.copy(alpha = 0.45f), shape)
+            .padding(horizontal = 10.dp, vertical = 3.dp),
     )
 }

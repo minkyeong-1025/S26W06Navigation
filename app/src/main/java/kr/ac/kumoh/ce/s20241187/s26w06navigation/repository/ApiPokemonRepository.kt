@@ -83,6 +83,7 @@ class ApiPokemonRepository(
             height = dto.height,
             weight = dto.weight,
             stats = dto.stats.map { Stat(it.stat.name, it.baseStat) },
+            englishName = dto.name.replaceFirstChar { it.uppercase() },  // 추가: bulbasaur → Bulbasaur
         )
     }
 }

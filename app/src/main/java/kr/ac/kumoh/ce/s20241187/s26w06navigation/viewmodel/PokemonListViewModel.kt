@@ -2,12 +2,16 @@ package kr.ac.kumoh.ce.s20241187.s26w06navigation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kr.ac.kumoh.ce.s20241187.s26w06navigation.model.Pokemon
 import kr.ac.kumoh.ce.s20241187.s26w06navigation.repository.PokemonRepository
-import kotlin.coroutines.cancellation.CancellationException
 
 class PokemonListViewModel(
     private val repository: PokemonRepository
@@ -16,19 +20,36 @@ class PokemonListViewModel(
     private val _pokemonList = MutableStateFlow<List<Pokemon>>(emptyList())
     val pokemonList = _pokemonList.asStateFlow()
 
-    // 추가: 불러오는 중인지
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
-    // 추가: 에러 메시지 (에러가 없으면 null)
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage = _errorMessage.asStateFlow()
+
+    // 추가: 검색어
+    private val _query = MutableStateFlow("")
+    val query = _query.asStateFlow()
+
+    // 추가: 전체 목록과 검색어를 합쳐서 화면에 보여 줄 목록을 만듦
+    // 둘 중 하나라도 바뀌면 자동으로 다시 계산됨
+    val filteredList: StateFlow<List<Pokemon>> =
+        combine(_pokemonList, _query) { list, query ->
+            list.filter { it.matches(query) }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList()
+        )
 
     init {
         loadPokemon()
     }
 
-    // 추가: 처음 실행할 때, 그리고 "다시 시도" 버튼을 누를 때 호출
+    // 추가: 검색창에 글자를 입력할 때마다 호출
+    fun onQueryChange(newQuery: String) {
+        _query.value = newQuery
+    }
+
     fun loadPokemon() {
         viewModelScope.launch {
             _isLoading.value = true
@@ -36,12 +57,21 @@ class PokemonListViewModel(
             try {
                 _pokemonList.value = repository.getAllPokemon()
             } catch (e: CancellationException) {
-                throw e    // 화면을 나가서 coroutine이 취소된 건 에러가 아니므로 그대로 넘김
+                throw e
             } catch (e: Exception) {
                 _errorMessage.value = "포켓몬을 불러오지 못했어요.\n인터넷 연결을 확인해 주세요."
             } finally {
-                _isLoading.value = false    // 성공하든 실패하든 로딩은 끝
+                _isLoading.value = false
             }
         }
     }
+}
+
+// 검색 규칙: 숫자면 도감 번호, 글자면 한국어 이름 또는 영어 이름에 포함되는지
+private fun Pokemon.matches(query: String): Boolean {
+    val text = query.trim().removePrefix("#")       // "#025" → "025"
+    if (text.isEmpty()) return true                 // 검색어 없으면 전부 보여 줌
+    text.toIntOrNull()?.let { number -> return id == number }   // "025" → 25번
+    return name.contains(text, ignoreCase = true) ||
+            englishName.contains(text, ignoreCase = true)
 }

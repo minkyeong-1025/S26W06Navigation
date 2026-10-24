@@ -2,6 +2,7 @@ package kr.ac.kumoh.ce.s20241187.s26w06navigation
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,7 +36,11 @@ import kr.ac.kumoh.ce.s20241187.s26w06navigation.ui.theme.S26W06NavigationTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        // 배경이 어두워서 상태 표시줄 아이콘(시계, 배터리)을 흰색으로
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+        )
 
         //val repository: PokemonRepository = MockPokemonRepository()
         val repository = ApiPokemonRepository()
