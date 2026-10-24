@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,6 +35,7 @@ import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -52,14 +54,22 @@ fun PokemonListScreen(
     onNavigateToDetail: (Int) -> Unit,
 ) {
     val pokemonList by viewModel.pokemonList.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()        // 추가
+    val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()  // 추가
 
-    // 추가: 화면 방향 확인
     val configuration = LocalConfiguration.current
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
-    if (isPortrait) {
-        // 세로: 지금까지와 같은 한 줄 리스트
-        LazyColumn(
+    // by로 받은 값은 smart cast가 안 돼서 지역 변수에 한 번 담음
+    val error = errorMessage
+
+    when {
+        isLoading -> LoadingView()
+        error != null -> ErrorView(
+            message = error,
+            onRetry = { viewModel.loadPokemon() }    // 이벤트는 위(ViewModel)로
+        )
+        isPortrait -> LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -70,9 +80,7 @@ fun PokemonListScreen(
                 }
             }
         }
-    } else {
-        // 가로: 2열 그리드
-        LazyVerticalGrid(
+        else -> LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
@@ -84,6 +92,38 @@ fun PokemonListScreen(
                     onNavigateToDetail(pokemon.id)
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun LoadingView() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        CircularProgressIndicator()
+        Spacer(Modifier.height(16.dp))
+        Text("포켓몬을 불러오는 중...")
+    }
+}
+
+@Composable
+fun ErrorView(message: String, onRetry: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = message,
+            textAlign = TextAlign.Center,
+            fontSize = 18.sp,
+        )
+        Spacer(Modifier.height(16.dp))
+        Button(onClick = onRetry) {
+            Text("다시 시도")
         }
     }
 }
