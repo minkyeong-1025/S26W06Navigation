@@ -3,8 +3,8 @@ package kr.ac.kumoh.ce.s20241187.s26w06navigation.ui.screen
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,12 +13,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -32,7 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.compositeOver
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -69,19 +66,8 @@ fun PokemonListScreen(
             message = error,
             onRetry = { viewModel.loadPokemon() }    // 이벤트는 위(ViewModel)로
         )
-        isPortrait -> LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            items(pokemonList, key = { it.id }) { pokemon ->
-                PokemonCard(pokemon) {
-                    onNavigateToDetail(pokemon.id)
-                }
-            }
-        }
         else -> LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+            columns = GridCells.Fixed(if (isPortrait) 2 else 3),   // 세로 2열, 가로 3열
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -133,60 +119,59 @@ fun PokemonCard(
     pokemon: Pokemon,
     onClick: (Int) -> Unit
 ) {
-    // 첫 번째 타입을 대표 타입으로 사용 ("grass, poison" → "grass")
     val mainType = pokemon.type.split(", ").first()
+    val color = typeColor(mainType)
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(8.dp),
-        // 추가: 카드 배경을 대표 타입 색으로 연하게
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),                 // 더 둥근 모서리
+        elevation = CardDefaults.cardElevation(4.dp),      // 그림자 살짝 약하게
         colors = CardDefaults.cardColors(
-            // 연한 타입 색을 흰 배경 위에 미리 섞어서 불투명한 색으로 만듦
-            // → 카드 밑의 그림자가 비치지 않음
-            containerColor = typeColor(mainType).copy(alpha = 0.15f)
+            containerColor = color.copy(alpha = 0.18f)
                 .compositeOver(MaterialTheme.colorScheme.surface)
         ),
         onClick = { onClick(pokemon.id) }
     ) {
         Row(
             modifier = Modifier
-                .fillMaxSize()
-                .height(IntrinsicSize.Min),
+                .fillMaxWidth()
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AsyncImage(
-                model = pokemon.image,
-                contentDescription = "${pokemon.name} 이미지",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(100.dp)
-                    .padding(8.dp)
-                    .clip(RoundedCornerShape(percent = 10))
-                    // 변경: 이미지 배경도 타입 색으로 (조금 더 진하게)
-                    .background(typeColor(mainType).copy(alpha = 0.3f))
-            )
-
-            Column(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceAround
-            ) {
+            // 왼쪽: 번호, 이름, 타입 (남은 공간 전부)
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "No. %03d".format(pokemon.id),
+                    color = MaterialTheme.colorScheme.outline,
+                    fontSize = 14.sp,
+                )
                 Text(
                     text = pokemon.name,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
+                    fontSize = 22.sp,
                 )
-                Spacer(Modifier.height(16.dp))
-                // 변경: 글자 대신 타입 칩
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Spacer(Modifier.height(10.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     pokemon.type.split(", ").forEach { type ->
                         TypeChip(type)
                     }
                 }
             }
-            Spacer(Modifier.width(16.dp))
+
+            // 오른쪽: 타입 색 원 + 큰 일러스트
+            Box(
+                modifier = Modifier
+                    .size(110.dp)
+                    .clip(CircleShape)
+                    .background(color.copy(alpha = 0.3f)),
+                contentAlignment = Alignment.Center
+            ) {
+                AsyncImage(
+                    model = pokemon.artwork.ifEmpty { pokemon.image },
+                    contentDescription = "${pokemon.name} 이미지",
+                    modifier = Modifier.size(96.dp)
+                )
+            }
         }
     }
 }
