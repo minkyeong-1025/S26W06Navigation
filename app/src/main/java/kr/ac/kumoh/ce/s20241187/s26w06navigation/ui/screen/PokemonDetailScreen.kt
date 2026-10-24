@@ -59,7 +59,7 @@ fun PokemonDetailScreen(
             modifier = Modifier
                 .size(240.dp)
                 .clip(RoundedCornerShape(percent = 10))
-                .background(MaterialTheme.colorScheme.primaryContainer)
+                .background(typeColor(pokemon.type.split(", ").first()).copy(alpha = 0.3f))
         )
 
         Spacer(Modifier.height(16.dp))
@@ -118,17 +118,6 @@ fun PokemonDetailScreen(
             StatBar(stat)
         }
     }
-}
-
-@Composable
-fun TypeChip(type: String) {
-    Text(
-        text = type,
-        modifier = Modifier
-            .clip(RoundedCornerShape(50))   // 알약 모양
-            .background(MaterialTheme.colorScheme.secondaryContainer)
-            .padding(horizontal = 12.dp, vertical = 4.dp),
-    )
 }
 
 @Composable

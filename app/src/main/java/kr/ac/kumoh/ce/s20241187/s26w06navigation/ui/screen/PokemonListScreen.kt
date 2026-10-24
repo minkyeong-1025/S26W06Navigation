@@ -65,11 +65,18 @@ fun PokemonCard(
     pokemon: Pokemon,
     onClick: (Int) -> Unit
 ) {
+    // 첫 번째 타입을 대표 타입으로 사용 ("grass, poison" → "grass")
+    val mainType = pokemon.type.split(", ").first()
+
     Card(
         modifier = Modifier
             .fillMaxWidth(),
         elevation = CardDefaults.cardElevation(8.dp),
-        onClick = { onClick(pokemon.id)}
+        // 추가: 카드 배경을 대표 타입 색으로 연하게
+        colors = CardDefaults.cardColors(
+            containerColor = typeColor(mainType).copy(alpha = 0.15f)
+        ),
+        onClick = { onClick(pokemon.id) }
     ) {
         Row(
             modifier = Modifier
@@ -84,16 +91,15 @@ fun PokemonCard(
                 modifier = Modifier
                     .size(100.dp)
                     .padding(8.dp)
-                    //.clip(CircleShape)
                     .clip(RoundedCornerShape(percent = 10))
-                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    // 변경: 이미지 배경도 타입 색으로 (조금 더 진하게)
+                    .background(typeColor(mainType).copy(alpha = 0.3f))
             )
 
             Column(
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxSize(),
-//                    .background(MaterialTheme.colorScheme.primaryContainer),
                 verticalArrangement = Arrangement.SpaceAround
             ) {
                 Text(
@@ -102,9 +108,12 @@ fun PokemonCard(
                     fontSize = 20.sp,
                 )
                 Spacer(Modifier.height(16.dp))
-                Text(
-                    text = pokemon.type,
-                )
+                // 변경: 글자 대신 타입 칩
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    pokemon.type.split(", ").forEach { type ->
+                        TypeChip(type)
+                    }
+                }
             }
             Spacer(Modifier.width(16.dp))
         }
