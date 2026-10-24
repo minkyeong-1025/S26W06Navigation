@@ -5,6 +5,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.json.Json
 import kr.ac.kumoh.ce.s20241187.s26w06navigation.model.Pokemon
+import kr.ac.kumoh.ce.s20241187.s26w06navigation.model.Stat
 import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -77,7 +78,11 @@ class ApiPokemonRepository(
             name = speciesDto?.koreanName ?: dto.name,
             type = types,
             info = speciesDto?.koreanInfo.orEmpty(),
-            image = dto.sprites.frontDefault ?: ""
+            image = dto.sprites.frontDefault ?: "",
+            artwork = dto.sprites.other?.officialArtwork?.frontDefault ?: dto.sprites.frontDefault ?: "",
+            height = dto.height,
+            weight = dto.weight,
+            stats = dto.stats.map { Stat(it.stat.name, it.baseStat) },
         )
     }
 }

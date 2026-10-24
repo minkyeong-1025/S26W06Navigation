@@ -38,7 +38,10 @@ data class PokemonListDto(
 data class PokemonDetailDto(
     @SerialName("id") val id: Int,
     @SerialName("name") val name: String,
+    @SerialName("height") val height: Int = 0,          // 추가: 단위 10cm
+    @SerialName("weight") val weight: Int = 0,          // 추가: 단위 100g
     @SerialName("types") val types: List<TypeSlotDto>,
+    @SerialName("stats") val stats: List<StatSlotDto> = emptyList(),   // 추가
     @SerialName("sprites") val sprites: SpritesDto
 ) {
     @Serializable
@@ -52,8 +55,32 @@ data class PokemonDetailDto(
         @SerialName("name") val name: String
     )
 
+    // 추가: 능력치 하나 { "base_stat": 45, "stat": { "name": "hp" } }
+    @Serializable
+    data class StatSlotDto(
+        @SerialName("base_stat") val baseStat: Int,
+        @SerialName("stat") val stat: StatDto
+    )
+
+    @Serializable
+    data class StatDto(
+        @SerialName("name") val name: String
+    )
+
     @Serializable
     data class SpritesDto(
+        @SerialName("front_default") val frontDefault: String? = null,
+        @SerialName("other") val other: OtherDto? = null          // 추가
+    )
+
+    // 추가: 큰 공식 일러스트 { "official-artwork": { "front_default": "..." } }
+    @Serializable
+    data class OtherDto(
+        @SerialName("official-artwork") val officialArtwork: ArtworkDto? = null
+    )
+
+    @Serializable
+    data class ArtworkDto(
         @SerialName("front_default") val frontDefault: String? = null
     )
 }
